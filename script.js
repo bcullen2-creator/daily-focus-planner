@@ -4,9 +4,13 @@ const elements = {
   form: document.querySelector("#task-form"),
   titleInput: document.querySelector("#task-title"),
   categorySelect: document.querySelector("#task-category"),
+  prioritySelect: document.querySelector("#task-priority"),
+  dueDateInput: document.querySelector("#task-due-date"),
+  focusList: document.querySelector("#focus-list"),
   workList: document.querySelector("#work-list"),
   personalList: document.querySelector("#personal-list"),
   completedList: document.querySelector("#completed-list"),
+  focusCount: document.querySelector("#focus-count"),
   workCount: document.querySelector("#work-count"),
   personalCount: document.querySelector("#personal-count"),
   completedCount: document.querySelector("#completed-count"),
@@ -25,6 +29,8 @@ function handleAddTask(event) {
 
   const title = elements.titleInput.value.trim();
   const category = elements.categorySelect.value;
+  const priority = elements.prioritySelect.value;
+  const dueDate = elements.dueDateInput.value;
 
   if (!title) {
     elements.titleInput.focus();
@@ -35,6 +41,8 @@ function handleAddTask(event) {
     id: crypto.randomUUID(),
     title,
     category,
+    priority,
+    dueDate,
     completed: false,
     createdAt: Date.now()
   });
@@ -76,9 +84,17 @@ function handleTaskAction(event) {
 function renderTasks() {
   clearLists();
 
-  const activeWorkTasks = tasks.filter((task) => !task.completed && task.category === "work");
-  const activePersonalTasks = tasks.filter((task) => !task.completed && task.category === "personal");
-  const completedTasks = tasks.filter((task) => task.completed);
+  const activeTasks = tasks.filter((task) => !task.completed).sort(compareTasks);
+  const activeWorkTasks = activeTasks.filter((task) => task.category === "work");
+  const activePersonalTasks = activeTasks.filter((task) => task.category === "personal");
+  const focusTasks = activeTasks.slice(0, 3);
+  const completedTasks = tasks
+    .filter((task) => task.completed)
+    .sort((firstTask, secondTask) => secondTask.createdAt - firstTask.createdAt);
+
+  focusTasks.forEach((task) => {
+    elements.focusList.append(createTaskElement(task));
+  });
 
   activeWorkTasks.forEach((task) => {
     elements.workList.append(createTaskElement(task));
@@ -92,6 +108,7 @@ function renderTasks() {
     elements.completedList.append(createTaskElement(task));
   });
 
+  elements.focusCount.textContent = `${focusTasks.length} selected`;
   elements.workCount.textContent = formatCount(activeWorkTasks.length, "task");
   elements.personalCount.textContent = formatCount(activePersonalTasks.length, "task");
   elements.completedCount.textContent = formatCount(completedTasks.length, "done");
@@ -102,20 +119,26 @@ function createTaskElement(task) {
   const item = fragment.querySelector(".task-item");
   const title = fragment.querySelector(".task-title");
   const badge = fragment.querySelector(".task-badge");
+  const priorityBadge = fragment.querySelector(".priority-badge");
+  const dueDate = fragment.querySelector(".due-date");
   const toggleButton = fragment.querySelector('[data-action="toggle"]');
 
   item.dataset.taskId = task.id;
   item.dataset.category = task.category;
+  item.dataset.priority = task.priority;
   item.dataset.completed = String(task.completed);
 
   title.textContent = task.title;
   badge.textContent = capitalize(task.category);
+  priorityBadge.textContent = `${capitalize(task.priority)} priority`;
+  dueDate.textContent = task.dueDate ? formatDate(task.dueDate) : "No due date";
   toggleButton.textContent = task.completed ? "Restore" : "Complete";
 
   return fragment;
 }
 
 function clearLists() {
+  elements.focusList.innerHTML = "";
   elements.workList.innerHTML = "";
   elements.personalList.innerHTML = "";
   elements.completedList.innerHTML = "";
@@ -134,6 +157,8 @@ function loadTasks() {
         id: crypto.randomUUID(),
         title: "Check tomorrow's work priorities",
         category: "work",
+        priority: "high",
+        dueDate: getRelativeDate(1),
         completed: false,
         createdAt: Date.now()
       },
@@ -141,6 +166,8 @@ function loadTasks() {
         id: crypto.randomUUID(),
         title: "Plan one personal errand for the weekend",
         category: "personal",
+        priority: "medium",
+        dueDate: getRelativeDate(3),
         completed: false,
         createdAt: Date.now()
       }
@@ -162,4 +189,43 @@ function formatCount(count, label) {
 
 function capitalize(value) {
   return value.charAt(0).toUpperCase() + value.slice(1);
+}
+
+function compareTasks(firstTask, secondTask) {
+  const priorityDifference = getPriorityRank(firstTask.priority) - getPriorityRank(secondTask.priority);
+  if (priorityDifference !== 0) {
+    return priorityDifference;
+  }
+
+  const firstDueTime = firstTask.dueDate ? new Date(firstTask.dueDate).getTime() : Number.POSITIVE_INFINITY;
+  const secondDueTime = secondTask.dueDate ? new Date(secondTask.dueDate).getTime() : Number.POSITIVE_INFINITY;
+  if (firstDueTime !== secondDueTime) {
+    return firstDueTime - secondDueTime;
+  }
+
+  return secondTask.createdAt - firstTask.createdAt;
+}
+
+function getPriorityRank(priority) {
+  const priorityRanks = {
+    high: 0,
+    medium: 1,
+    low: 2
+  };
+
+  return priorityRanks[priority] ?? 3;
+}
+
+function formatDate(value) {
+  const date = new Date(`${value}T00:00:00`);
+  return date.toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric"
+  });
+}
+
+function getRelativeDate(daysFromToday) {
+  const date = new Date();
+  date.setDate(date.getDate() + daysFromToday);
+  return date.toISOString().split("T")[0];
 }

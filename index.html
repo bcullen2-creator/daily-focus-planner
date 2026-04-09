@@ -34,8 +34,33 @@
           </select>
         </div>
 
+        <div class="field">
+          <label for="task-priority">Priority</label>
+          <select id="task-priority" name="task-priority">
+            <option value="high">High</option>
+            <option value="medium" selected>Medium</option>
+            <option value="low">Low</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="task-due-date">Due Date</label>
+          <input id="task-due-date" name="task-due-date" type="date">
+        </div>
+
         <button class="add-task-button" type="submit">Add Task</button>
       </form>
+
+      <section class="focus-panel">
+        <div class="column-header">
+          <div>
+            <h2>Top 3 Today</h2>
+            <p class="section-copy">Your most urgent active tasks based on priority and due date.</p>
+          </div>
+          <span id="focus-count">0 selected</span>
+        </div>
+        <ul class="task-list focus-list" id="focus-list" aria-label="Top 3 tasks for today"></ul>
+      </section>
 
       <section class="task-board">
         <div class="task-column">
@@ -69,7 +94,11 @@
     <li class="task-item">
       <div class="task-content">
         <p class="task-title"></p>
-        <span class="task-badge"></span>
+        <div class="task-meta">
+          <span class="task-badge"></span>
+          <span class="priority-badge"></span>
+          <span class="due-date"></span>
+        </div>
       </div>
       <div class="task-actions">
         <button class="secondary-button" data-action="toggle" type="button">Complete</button>

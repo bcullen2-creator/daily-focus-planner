@@ -71,7 +71,7 @@ body {
 
 .task-form {
   display: grid;
-  grid-template-columns: minmax(0, 2fr) minmax(180px, 1fr) auto;
+  grid-template-columns: minmax(0, 2fr) repeat(3, minmax(150px, 1fr)) auto;
   gap: 1rem;
   margin-bottom: 1.5rem;
 }
@@ -135,12 +135,20 @@ body {
   margin-bottom: 1rem;
 }
 
+.focus-panel,
 .task-column,
 .completed-panel {
   border: 1px solid var(--border);
   border-radius: 22px;
   padding: 1rem;
   background: rgba(255, 255, 255, 0.58);
+}
+
+.focus-panel {
+  margin-bottom: 1rem;
+  background:
+    linear-gradient(135deg, rgba(203, 90, 47, 0.09), rgba(52, 102, 175, 0.09)),
+    rgba(255, 255, 255, 0.58);
 }
 
 .column-header {
@@ -159,6 +167,12 @@ body {
 .column-header span {
   font-size: 0.9rem;
   color: var(--muted);
+}
+
+.section-copy {
+  margin: 0.35rem 0 0;
+  color: var(--muted);
+  font-size: 0.92rem;
 }
 
 .task-list {
@@ -203,6 +217,12 @@ body {
   overflow-wrap: anywhere;
 }
 
+.task-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
 .task-badge {
   display: inline-flex;
   align-items: center;
@@ -210,6 +230,33 @@ body {
   border-radius: 999px;
   font-size: 0.8rem;
   font-weight: 700;
+}
+
+.priority-badge,
+.due-date {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.3rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  background: rgba(43, 36, 24, 0.08);
+  color: var(--text);
+}
+
+.task-item[data-priority="high"] .priority-badge {
+  background: rgba(159, 47, 47, 0.14);
+  color: var(--danger);
+}
+
+.task-item[data-priority="medium"] .priority-badge {
+  background: rgba(203, 90, 47, 0.14);
+  color: var(--accent-dark);
+}
+
+.task-item[data-priority="low"] .priority-badge {
+  background: rgba(47, 125, 106, 0.14);
+  color: var(--personal);
 }
 
 .task-item[data-category="work"] .task-badge {
@@ -225,6 +272,11 @@ body {
 .task-item[data-completed="true"] .task-title {
   text-decoration: line-through;
   color: var(--muted);
+}
+
+.focus-list .task-item {
+  border-color: rgba(203, 90, 47, 0.18);
+  box-shadow: 0 10px 24px rgba(68, 46, 17, 0.08);
 }
 
 .task-actions {
